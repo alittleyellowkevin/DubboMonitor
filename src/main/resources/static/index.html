@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dubbo Monitor</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/element-plus"></script>
+    <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        /* 页签样式 */
+        .tabs-wrapper {
+            padding: 10px 20px 0;
+            border-bottom: 1px solid #e4e7ed;
+            display: flex;
+            justify-content: center;
+        }
+
+        .port-tabs {
+            background-color: #f5f7fa;
+            width: 1000px;
+            display: flex;
+            align-items: center;
+        }
+
+        .add-tab-btn {
+            margin-left: 10px;
+        }
+
+        /* 原有样式 */
+        .container {
+            padding: 10px 20px;
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 100px);
+            /* 减去页签的高度 */
+        }
+
+        .left-panel {
+            flex: 0 0 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: #f5f7fa;
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .params-panel,
+        .result-panel {
+            background: #f5f7fa;
+            padding: 20px;
+            border-radius: 4px;
+            flex: 1;
+            overflow: auto;
+        }
+
+        .title {
+            margin: 0 0 20px 0;
+            font-size: 16px;
+            color: #409EFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .json-editor {
+            width: 100%;
+            height: calc(100% - 60px);
+            font-family: monospace;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            padding: 10px;
+            resize: none;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #fff;
+            border: 1px solid #dcdfe6;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .error-tip {
+            color: #f56c6c;
+            font-size: 14px;
+            margin-top: 5px;
+            padding: 5px;
+            background-color: #fef0f0;
+            border-radius: 4px;
+        }
+
+        .refresh-icon {
+            cursor: pointer;
+            font-size: 16px;
+            color: #409EFF;
+        }
+
+        .refresh-icon:hover {
+            color: #79bbff;
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: #909399;
+            margin: 20px 0;
+        }
+
+        .json-error {
+            border-color: #f56c6c !important;
+        }
+
+        /* 添加页签相关样式 */
+        .tab-header {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .port-tabs {
+            background-color: #f5f7fa;
+            flex: 1;
+            height: 40px;
+        }
+
+        .add-tab-btn {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- 顶部页签 -->
+        <div class="tabs-wrapper">
+            <div class="port-tabs">
+                <el-tabs v-model="activeTab" type="card" closable @tab-remove="removeTab"
+                    style="font-size: 16px; margin-top: 15px;">
+                    <el-tab-pane v-for="tab in tabs" :key="tab.id" :label="'端口: ' + tab.port" :name="tab.id">
+                    </el-tab-pane>
+                </el-tabs>
+                <el-button type="primary" @click="addNewTab" class="add-tab-btn" size="small">
+                    新增页签
+                </el-button>
+            </div>
+        </div>
+
+        <!-- 原有内容容器 -->
+        <div class="container">
+            <!-- 左侧面板 -->
+            <div class="left-panel" v-if="getCurrentTab()">
+                <div>
+                    <h3 class="title">
+                        端口配置
+                        <el-tooltip content="修改端口后会自动重新加载服务列表" placement="top">
+                            <el-input-number v-model="getCurrentTab().port" :min="1" :max="65535" size="small"
+                                @change="(val) => { getCurrentTab().port = val; loadServices(getCurrentTab()); }"
+                                style="width: 120px">
+                            </el-input-number>
+                        </el-tooltip>
+                    </h3>
+                </div>
+
+                <div>
+                    <h3 class="title">
+                        服务列表
+                        <el-icon class="refresh-icon" @click="loadServices(getCurrentTab())">
+                            <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                                <path fill="currentColor"
+                                    d="M771.776 794.88A384 384 0 01128 512h64a320 320 0 00555.712 216.448H654.72a32 32 0 110-64h149.056a32 32 0 0132 32v148.928a32 32 0 11-64 0v-50.56zM276.288 295.616h92.992a32 32 0 010 64H220.16a32 32 0 01-32-32V178.56a32 32 0 0164 0v50.56A384 384 0 01896 512h-64a320 320 0 00-555.712-216.384z" />
+                            </svg>
+                        </el-icon>
+                    </h3>
+                    <div v-if="getCurrentTab().loadError" class="error-tip">
+                        {{ getCurrentTab().loadError }}
+                        <el-button type="text" @click="loadServices(getCurrentTab())">重试</el-button>
+                    </div>
+                    <el-select v-model="getCurrentTab().selectedService" placeholder="请先加载服务"
+                        @change="handleServiceChange"
+                        :disabled="!getCurrentTab().services || getCurrentTab().services.length === 0"
+                        style="width: 100%">
+                        <el-option v-for="service in getCurrentTab().services" :key="service" :label="service"
+                            :value="service">
+                        </el-option>
+                    </el-select>
+                </div>
+
+                <div>
+                    <h3 class="title">方法列表</h3>
+                    <el-select v-model="getCurrentTab().selectedMethod" placeholder="请先选择服务"
+                        :disabled="!getCurrentTab().selectedService" style="width: 100%">
+                        <el-option v-for="method in getCurrentTab().methods" :key="method" :label="method"
+                            :value="method">
+                        </el-option>
+                    </el-select>
+                </div>
+
+                <div style="margin-top: auto;">
+                    <el-button type="success" :disabled="!getCurrentTab().selectedMethod" @click="invokeMethod"
+                        style="width: 100%">
+                        发送请求
+                    </el-button>
+                </div>
+            </div>
+
+            <!-- 右侧面板 -->
+            <div class="right-panel" v-if="getCurrentTab()">
+                <!-- 请求参数 -->
+                <div class="params-panel">
+                    <h3 class="title">
+                        请求参数
+                        <el-button type="primary" size="small" @click="formatJsonParams" style="margin-left: 10px;">
+                            格式化JSON
+                        </el-button>
+                    </h3>
+                    <textarea v-model="getCurrentTab().requestParams" class="json-editor" placeholder="请输入JSON格式的请求参数"
+                        @input="handleParamsChange" @keydown.tab.prevent="handleTabKey" @keydown="handleKeyDown"
+                        :class="{'json-error': getCurrentTab().hasJsonError}" style="width: 99%; height: 75%;">
+                    </textarea>
+                    <div v-if="getCurrentTab().jsonErrorMessage" class="error-tip">
+                        {{ getCurrentTab().jsonErrorMessage }}
+                    </div>
+                </div>
+
+                <!-- 请求结果 -->
+                <div class="result-panel">
+                    <h3 class="title">
+                        请求结果
+                        <span v-if="getCurrentTab().invokeResult && getCurrentTab().invokeResult.time !== undefined"
+                            style="color: #909399; font-size: 14px;">
+                            耗时: {{ getCurrentTab().invokeResult.time }}ms
+                        </span>
+                    </h3>
+                    <pre
+                        v-if="getCurrentTab().invokeResult">{{ JSON.stringify(getCurrentTab().invokeResult.result, null, 2) }}</pre>
+                    <div v-else class="empty-tip">
+                        暂无请求结果
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, watch, onMounted, nextTick } = Vue;
+        const { ElMessage } = ElementPlus;
+
+        // 配置 axios 默认地址
+        axios.defaults.baseURL = 'http://localhost:8080';
+
+        // 定义页签数据结构
+        let tabIndex = 0;  // 移到外部，确保全局可访问
+
+        const createTabData = (port) => {
+            return {
+                id: `tab-${tabIndex++}`,
+                port: port,
+                services: [],
+                methods: [],
+                selectedService: '',
+                selectedMethod: '',
+                requestParams: '{\n  \n}',
+                invokeResult: null,
+                loadingServices: false,
+                loadingMethods: false,
+                loadError: '',
+                jsonErrorMessage: '',
+                hasJsonError: false
+            };
+        };
+
+        const app = createApp({
+            setup() {
+                // 页签相关的状态
+                const tabs = ref([]);
+                const activeTab = ref('');
+
+                // 配置信息
+                const config = reactive({
+                    host: 'localhost',
+                    port: 31361
+                });
+
+                // 获取当前激活的页签数据
+                const getCurrentTab = () => {
+                    const currentTab = tabs.value.find(tab => tab.id === activeTab.value);
+                    if (!currentTab && tabs.value.length > 0) {
+                        // 如果当前没有选中的页签但有页签存在，选中第一个
+                        activeTab.value = tabs.value[0].id;
+                        return tabs.value[0];
+                    }
+                    return currentTab;  // 如果没有页签，返回undefined
+                };
+
+                // 添加新页签
+                const addNewTab = () => {
+                    const newTab = createTabData(config.port);
+                    tabs.value.push(newTab);
+                    activeTab.value = newTab.id;
+                };
+
+                // 移除页签
+                const removeTab = (targetName) => {
+                    // 如果只剩最后一个页签，不允许删除
+                    if (tabs.value.length === 1) {
+                        ElMessage.warning('至少需要保留一个页签');
+                        return;
+                    }
+
+                    // 找到要删除的页签的索引
+                    const targetIndex = tabs.value.findIndex(tab => tab.id === targetName);
+
+                    // 如果当前激活的是要删除的页签，需要激活其他页签
+                    if (activeTab.value === targetName) {
+                        // 优先选择右边的页签，如果没有右边的就选择左边的
+                        const newActiveTab = tabs.value[targetIndex + 1] || tabs.value[targetIndex - 1];
+                        activeTab.value = newActiveTab.id;
+                    }
+
+                    // 删除目标页签
+                    tabs.value = tabs.value.filter(tab => tab.id !== targetName);
+                };
+
+                // 页面加载时自动创建第一个页签
+                onMounted(() => {
+                    if (tabs.value.length === 0) {
+                        const newTab = createTabData(config.port);
+                        tabs.value.push(newTab);
+                        activeTab.value = newTab.id;
+                        // 自动加载服务列表
+                        loadServices(newTab);
+                    }
+                });
+
+                // 加载服务列表
+                const loadServices = async (tab) => {
+                    if (!tab) return;
+
+                    // 如果已经在加载中，不要重复加载
+                    if (tab.loadingServices) {
+                        console.log('服务正在加载中，跳过重复加载');
+                        return;
+                    }
+
+                    console.log('加载服务列表, 端口:', tab.port, '页签ID:', tab.id);
+                    tab.loadingServices = true;
+                    tab.loadError = '';
+                    tab.services = [];
+                    tab.selectedService = '';
+                    tab.selectedMethod = '';
+                    tab.methods = [];
+
+                    try {
+                        const response = await axios.post('/api/dubbo/services', {
+                            "port": Number(tab.port)
+                        }, {
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.data.services && response.data.services.length > 0) {
+                            tab.services = response.data.services;
+                            ElMessage.success('服务列表加载成功');
+                        } else {
+                            tab.loadError = '未找到可用服务';
+                        }
+                    } catch (error) {
+                        console.error('请求错误:', error);
+                        tab.loadError = '加载服务列表失败: ' + (error.response?.data?.message || error.message);
+                        ElMessage.error(tab.loadError);
+                    } finally {
+                        tab.loadingServices = false;
+                    }
+                };
+
+                // 服务选择改变时加载方法列表
+                const handleServiceChange = async () => {
+                    const currentTab = getCurrentTab();
+                    if (!currentTab) return;
+
+                    currentTab.selectedMethod = '';
+                    currentTab.invokeResult = null;
+
+                    if (!currentTab.selectedService) {
+                        currentTab.methods = [];
+                        return;
+                    }
+
+                    currentTab.loadingMethods = true;
+                    try {
+                        const response = await axios.post('/api/dubbo/methods', {
+                            "port": Number(currentTab.port),
+                            "service": currentTab.selectedService
+                        }, {
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        currentTab.methods = response.data.methods;
+                        ElMessage.success('方法列表加载成功');
+                    } catch (error) {
+                        console.error('请求错误:', error);
+                        ElMessage.error('加载方法列表失败: ' + error.message);
+                        currentTab.methods = [];
+                    } finally {
+                        currentTab.loadingMethods = false;
+                    }
+                };
+
+                // 检查JSON格式
+                const checkJsonFormat = () => {
+                    const currentTab = getCurrentTab();
+                    if (!currentTab) return;
+
+                    try {
+                        if (!currentTab.requestParams.trim()) {
+                            throw new Error('JSON不能为空');
+                        }
+
+                        const parsedJson = JSON.parse(currentTab.requestParams);
+
+                        if (typeof parsedJson !== 'object') {
+                            throw new Error('JSON必须是一个对象或数组');
+                        }
+
+                        currentTab.requestParams = JSON.stringify(parsedJson, null, 4);
+                        currentTab.hasJsonError = false;
+                        currentTab.jsonErrorMessage = '';
+                        ElMessage.success('JSON格式正确');
+                    } catch (error) {
+                        currentTab.hasJsonError = true;
+                        currentTab.jsonErrorMessage = `JSON格式错误: ${error.message}`;
+                        ElMessage.error(currentTab.jsonErrorMessage);
+                    }
+                };
+
+                // 处理参数变化
+                const handleParamsChange = () => {
+                    const currentTab = getCurrentTab();
+                    if (!currentTab) return;
+
+                    try {
+                        if (currentTab.requestParams.trim()) {
+                            JSON.parse(currentTab.requestParams);
+                            currentTab.hasJsonError = false;
+                            currentTab.jsonErrorMessage = '';
+                        }
+                    } catch (e) {
+                        currentTab.hasJsonError = true;
+                        currentTab.jsonErrorMessage = `JSON格式错误: ${e.message}`;
+                    }
+                };
+
+                // 处理Tab键
+                const handleTabKey = (e) => {
+                    e.preventDefault();
+                    const textarea = e.target;
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+
+                    // 在光标位置插入制表符（4个空格）
+                    const newValue = textarea.value.substring(0, start) + "    " + textarea.value.substring(end);
+                    const currentTab = getCurrentTab();
+                    if (currentTab) {
+                        currentTab.requestParams = newValue;
+                        // 设置新的光标位置
+                        nextTick(() => {
+                            textarea.selectionStart = textarea.selectionEnd = start + 4;
+                        });
+                    }
+                };
+
+                // 处理键盘输入
+                const handleKeyDown = (e) => {
+                    const currentTab = getCurrentTab();
+                    if (!currentTab) return;
+
+                    // 处理括号自动补全
+                    const bracketPairs = {
+                        '{': '}',
+                        '[': ']',
+                        '"': '"'
+                    };
+
+                    if (bracketPairs.hasOwnProperty(e.key)) {
+                        e.preventDefault();
+                        const textarea = e.target;
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+
+                        // 如果是选中的文本，用括号包裹
+                        if (start !== end) {
+                            const selectedText = textarea.value.substring(start, end);
+                            const newValue = textarea.value.substring(0, start) +
+                                e.key + selectedText + bracketPairs[e.key] +
+                                textarea.value.substring(end);
+                            currentTab.requestParams = newValue;
+                            // 光标位置移到结束括号后
+                            nextTick(() => {
+                                textarea.selectionStart = textarea.selectionEnd = end + 2;
+                            });
+                        } else {
+                            // 插入一对括号，光标停在中间
+                            const newValue = textarea.value.substring(0, start) +
+                                e.key + bracketPairs[e.key] +
+                                textarea.value.substring(end);
+                            currentTab.requestParams = newValue;
+                            // 光标位置移到括号中间
+                            nextTick(() => {
+                                textarea.selectionStart = textarea.selectionEnd = start + 1;
+                            });
+                        }
+                    }
+                    // 处理冒号后自动添加空格
+                    else if (e.key === ':') {
+                        e.preventDefault();
+                        const textarea = e.target;
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+
+                        const newValue = textarea.value.substring(0, start) +
+                            ': ' +
+                            textarea.value.substring(end);
+                        currentTab.requestParams = newValue;
+                        // 光标位置移到空格后
+                        nextTick(() => {
+                            textarea.selectionStart = textarea.selectionEnd = start + 2;
+                        });
+                    }
+                    // 处理回车自动缩进
+                    else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const textarea = e.target;
+                        const start = textarea.selectionStart;
+                        const value = textarea.value;
+
+                        // 获取当前行的内容
+                        const lines = value.substring(0, start).split('\n');
+                        const currentLine = lines[lines.length - 1];
+
+                        // 计算当前行的缩进
+                        const match = currentLine.match(/^\s*/);
+                        let indent = match ? match[0] : '';
+
+                        // 如果当前行以冒号结尾，增加一个缩进级别
+                        if (currentLine.trim().endsWith(':') || currentLine.trim().endsWith('{')) {
+                            indent += '    ';
+                        }
+                        // 如果当前行以逗号结尾，保持相同缩进
+                        else if (currentLine.trim().endsWith(',')) {
+                            // 保持相同缩进
+                        }
+                        // 如果当前行以 } 或 ] 结尾，减少一个缩进级别
+                        else if (currentLine.trim().endsWith('}') || currentLine.trim().endsWith(']')) {
+                            indent = indent.slice(4);
+                        }
+
+                        // 插入新行和缩进
+                        const newValue = value.substring(0, start) +
+                            '\n' + indent +
+                            value.substring(start);
+                        currentTab.requestParams = newValue;
+
+                        // 设置光标位置到新行的缩进后
+                        nextTick(() => {
+                            textarea.selectionStart = textarea.selectionEnd = start + 1 + indent.length;
+                        });
+                    }
+                };
+
+                // 调用服务方法
+                const invokeMethod = async () => {
+                    const currentTab = getCurrentTab();
+                    if (!currentTab) return;
+
+                    try {
+                        // 去除空行和空格
+                        const cleanJsonParams = currentTab.requestParams.replace(/\s+/g, '');
+
+                        const response = await axios.post('/api/dubbo/invoke', {
+                            port: Number(currentTab.port),
+                            serviceName: currentTab.selectedService,
+                            methodName: currentTab.selectedMethod.split('(')[0],
+                            jsonParams: cleanJsonParams
+                        });
+
+                        // 处理返回的数据
+                        if (response.data && response.data.result) {
+                            try {
+                                const parsedResult = JSON.parse(response.data.result);
+                                response.data.result = parsedResult;
+                            } catch (e) {
+                                console.error('解析返回结果失败:', e);
+                            }
+                        }
+
+                        currentTab.invokeResult = response.data;
+                        ElMessage.success('服务调用成功');
+                    } catch (error) {
+                        ElMessage.error('服务调用失败: ' + error.message);
+                        currentTab.invokeResult = null;
+                    }
+                };
+
+                // 格式化JSON参数
+                const formatJsonParams = () => {
+                    const currentTab = getCurrentTab();
+                    if (!currentTab) return;
+
+                    try {
+                        const parsedJson = JSON.parse(currentTab.requestParams);
+                        currentTab.requestParams = JSON.stringify(parsedJson, null, 4);
+                        currentTab.hasJsonError = false;
+                        currentTab.jsonErrorMessage = '';
+                        ElMessage.success('JSON格式化成功');
+                    } catch (error) {
+                        currentTab.hasJsonError = true;
+                        currentTab.jsonErrorMessage = `JSON格式错误: ${error.message}`;
+                        ElMessage.error(currentTab.jsonErrorMessage);
+                    }
+                };
+
+                return {
+                    tabs,
+                    activeTab,
+                    addNewTab,
+                    removeTab,
+                    config,
+                    getCurrentTab,
+                    handleServiceChange,
+                    handleParamsChange,
+                    handleTabKey,
+                    handleKeyDown,
+                    checkJsonFormat,
+                    invokeMethod,
+                    loadServices,
+                    formatJsonParams
+                };
+            }
+        });
+
+        // 添加 Vue 错误处理
+        app.config.errorHandler = (err, vm, info) => {
+            console.error('Vue 错误:', err);
+            console.error('错误信息:', info);
+        };
+
+        app.use(ElementPlus);
+        app.mount('#app');
+    </script>
+</body>
+
+</html>

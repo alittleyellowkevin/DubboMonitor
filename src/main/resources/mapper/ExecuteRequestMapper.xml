@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lexin.dubbo.monitor.dao.mapper.ExecuteRequestMapper">
+    
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, port, service, method, name, json_params, create_time, update_time
+    </sql>
+
+    <!-- 插入执行记录 -->
+    <insert id="insert" parameterType="com.lexin.dubbo.monitor.dao.domain.ExecuteRequestDo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO execute_request (port, service, method, name, json_params)
+        VALUES (#{port}, #{service}, #{method}, #{name}, #{jsonParams})
+    </insert>
+
+    <!-- 根据ID删除执行记录 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM execute_request WHERE id = #{id}
+    </delete>
+
+    <!-- 更新执行记录 -->
+    <update id="update" parameterType="com.lexin.dubbo.monitor.dao.domain.ExecuteRequestDo">
+        UPDATE execute_request
+        SET port = #{port},
+            service = #{service},
+            method = #{method},
+            name = #{name},
+            json_params = #{jsonParams}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID查询执行记录 -->
+    <select id="selectById" parameterType="java.lang.Long" resultType="com.lexin.dubbo.monitor.dao.domain.ExecuteRequestDo">
+        SELECT <include refid="Base_Column_List"/>
+        FROM execute_request
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有执行记录 -->
+    <select id="selectAll" resultType="com.lexin.dubbo.monitor.dao.domain.ExecuteRequestDo">
+        SELECT <include refid="Base_Column_List"/>
+        FROM execute_request
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据服务ID查询执行记录 -->
+    <select id="selectByService" parameterType="java.lang.Integer" resultType="com.lexin.dubbo.monitor.dao.domain.ExecuteRequestDo">
+        SELECT <include refid="Base_Column_List"/>
+        FROM execute_request
+        WHERE service = #{serviceId}
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据方法名查询执行记录 -->
+    <select id="selectByMethod" parameterType="java.lang.String" resultType="com.lexin.dubbo.monitor.dao.domain.ExecuteRequestDo">
+        SELECT <include refid="Base_Column_List"/>
+        FROM execute_request
+        WHERE method = #{method}
+        ORDER BY id DESC
+    </select>
+</mapper> 

@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: dubbo-monitor
+
+dubbo:
+  registry:
+    address: zookeeper://10.9.22.26:2182?backup=10.9.22.27:2182,10.9.22.31:2182
+  application:
+    name: ${spring.application.name}
+  local:
+    host: localhost
+    port: 31361
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.lexin.dubbo.monitor.dao.domain
+  configuration:
+    map-underscore-to-camel-case: true
