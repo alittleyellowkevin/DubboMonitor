@@ -1,9 +1,15 @@
 package com.lexin.dubbo.monitor.dao.domain;
 
+import java.util.Date;
+
 import lombok.Data;
 
 @Data
 public class ExecuteRequestDo {
+    /**
+     * 记录ID
+     */
+    private Long id;
     /**
      * 执行端口
      */
@@ -12,7 +18,7 @@ public class ExecuteRequestDo {
     /**
      * 执行服务
      */
-    private Integer service;
+    private String service;
 
     /**
      * 执行方法
@@ -28,4 +34,20 @@ public class ExecuteRequestDo {
      * 执行参数
      */
     private String jsonParams;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 修改时间
+     */
+    private Date modifyTime;
+
+    /**
+     * 状态 0: 有效 1: 无效
+     */
+    private Integer isValid;
+
 }

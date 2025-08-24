@@ -12,9 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-
 @Slf4j
 @RestController
 @RequestMapping("/api/dubbo")
@@ -64,4 +61,5 @@ public class DubboMonitorController {
         log.info("调用结果: {}", resp.getResult());
         return resp;
     }
+
 }

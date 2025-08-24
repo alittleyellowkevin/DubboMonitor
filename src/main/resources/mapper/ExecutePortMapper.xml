@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lexin.dubbo.monitor.dao.dao.ExecutePortMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.lexin.dubbo.monitor.dao.domain.ExecutePortDo">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="port_name" property="portName" jdbcType="VARCHAR"/>
+        <result column="port" property="port" jdbcType="INTEGER"/>
+        <result column="local_addr" property="localAddr" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 基础字段 -->
+    <sql id="Base_Column_List">
+        id, port_name, port, local_addr, create_time, update_time
+    </sql>
+
+    <!-- 1. 插入端口配置 -->
+    <insert id="insert" parameterType="com.lexin.dubbo.monitor.dao.domain.ExecutePortDo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO execute_port (port_name, port, local_addr)
+        VALUES (#{portName}, #{port}, #{localAddr})
+    </insert>
+
+    <!-- 2. 根据端口名称删除端口配置 -->
+    <delete id="deleteByPortName" parameterType="java.lang.String">
+        DELETE FROM execute_port WHERE port_name = #{portName}
+    </delete>
+
+    <!-- 3. 根据端口号删除端口配置 -->
+    <delete id="deleteByPort" parameterType="java.lang.Integer">
+        DELETE FROM execute_port WHERE port = #{port}
+    </delete>
+
+    <!-- 4. 更新端口配置 -->
+    <update id="update" parameterType="com.lexin.dubbo.monitor.dao.domain.ExecutePortDo">
+        UPDATE execute_port
+        SET port = #{port},
+            local_addr = #{localAddr}
+        WHERE port_name = #{portName}
+    </update>
+
+    <!-- 5. 根据端口名称查询端口配置 -->
+    <select id="selectByPortName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM execute_port
+        WHERE port_name = #{portName}
+    </select>
+
+    <!-- 6. 根据端口号查询端口配置 -->
+    <select id="selectByPort" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM execute_port
+        WHERE port = #{port}
+    </select>
+
+    <!-- 7. 查询所有端口配置 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM execute_port
+        ORDER BY port_name
+    </select>
+
+    <!-- 8. 根据本地地址查询端口配置 -->
+    <select id="selectByLocalAddr" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM execute_port
+        WHERE local_addr = #{localAddr}
+        ORDER BY port_name
+    </select>
+
+    <!-- 9. 检查端口名称是否存在 -->
+    <select id="countByPortName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM execute_port
+        WHERE port_name = #{portName}
+    </select>
+
+    <!-- 10. 检查端口号是否存在 -->
+    <select id="countByPort" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM execute_port
+        WHERE port = #{port}
+    </select>
+
+</mapper> 

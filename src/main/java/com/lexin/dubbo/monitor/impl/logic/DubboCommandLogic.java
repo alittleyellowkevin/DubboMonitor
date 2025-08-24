@@ -114,16 +114,46 @@ public class DubboCommandLogic {
         String[] lines = data.split("[\\r\\n\\s]+");
         // 2. 遍历处理每一行
         for (String line : lines) {
-            // 3. 分割服务名
-            String[] fullServiceName = line.split("\\.");
-            // 4. 获取最后一部分作为服务名
-            String serviceName = fullServiceName[fullServiceName.length - 1];
-            // 5. 添加到结果列表
+            if (line.trim().isEmpty()) {
+                continue;
+            }
+
+            // 3. 处理服务名
+            String serviceName = formatServiceName(line.trim());
+
+            // 4. 添加到结果列表
             if (!result.contains(serviceName)) {
                 result.add(serviceName);
-                log.info("添加服务: {}", serviceName);
+                log.info("添加服务: {} (原始: {})", serviceName, line.trim());
             }
         }
+    }
+
+    /**
+     * 格式化服务名，使其更友好
+     */
+    private String formatServiceName(String fullServiceName) {
+        // 如果是 Dubbo 内部服务名（以 id_ 开头），尝试提取更有意义的部分
+        if (fullServiceName.startsWith("id_")) {
+            // 尝试从 id_ 后面提取有意义的部分
+            String[] parts = fullServiceName.split("_");
+            if (parts.length >= 3) {
+                // 取最后一部分作为服务名
+                return parts[parts.length - 1];
+            } else if (parts.length == 2) {
+                // 如果只有两部分，返回完整名称
+                return fullServiceName;
+            }
+        }
+
+        // 如果是标准的 Java 包名格式，取最后一部分
+        if (fullServiceName.contains(".")) {
+            String[] fullServiceNameParts = fullServiceName.split("\\.");
+            return fullServiceNameParts[fullServiceNameParts.length - 1];
+        }
+
+        // 其他情况直接返回原名称
+        return fullServiceName;
     }
 
     /**

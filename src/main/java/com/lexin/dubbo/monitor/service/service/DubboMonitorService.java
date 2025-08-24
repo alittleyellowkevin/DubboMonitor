@@ -1,5 +1,6 @@
 package com.lexin.dubbo.monitor.service.service;
 
+import com.lexin.dubbo.monitor.service.req.InsertExecuteReq;
 import com.lexin.dubbo.monitor.service.req.InvokeMethodReq;
 import com.lexin.dubbo.monitor.service.req.MethodsQueryReq;
 import com.lexin.dubbo.monitor.service.req.ServicesQueryReq;
@@ -27,14 +28,11 @@ public interface DubboMonitorService {
     MethodsListResp getMethods(MethodsQueryReq request);
 
     /**
-     * 获取
-     */
-
-    /**
      * 调用指定服务的方法
      *
-     * @param request   请求参数
+     * @param request 请求参数
      * @return 方法调用结果
      */
     InvokeMethodResp invokeMethod(InvokeMethodReq request);
+
 }
