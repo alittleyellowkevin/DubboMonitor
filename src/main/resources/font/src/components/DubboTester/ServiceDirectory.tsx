@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
-import { type DirectoryNode } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
-
-interface TestCase {
-  id: string;
-  name: string;
-  params: string;
-  createTime: Date;
-  method?: string;
-}
+import type { TestCase, DirectoryNode } from '@/lib/types';
 
 interface ServiceDirectoryProps {
   directoryData: DirectoryNode[];
@@ -36,7 +28,7 @@ export default function ServiceDirectory({
   onUpdateRequest,
   onDeleteRequest,
   onLoadHistoryParams,
-  onUpdateTestCase,
+  // onUpdateTestCase, // Currently not used
   className = ''
 }: ServiceDirectoryProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,15 +103,15 @@ export default function ServiceDirectory({
     if (historyNode.data) {
       console.log('ServiceDirectory: Setting service and method:', historyNode.data.service, historyNode.data.method);
 
-      setActiveService(historyNode.data.service);
-      setActiveMethod(historyNode.data.method);
+      setActiveService(historyNode.data?.service || null);
+      setActiveMethod(historyNode.data?.method || null);
 
       // 创建测试用例对象并设置为选中状态
       const testCase: TestCase = {
         id: historyNode.data.id.toString(),
         name: historyNode.label,
         params: historyNode.data.jsonParams || '{}',
-        createTime: new Date(historyNode.data.createTime),
+        createTime: historyNode.data.createTime ? new Date(historyNode.data.createTime) : new Date(),
         method: historyNode.data.method
       };
       console.log('ServiceDirectory: Created test case:', testCase);
@@ -288,7 +280,7 @@ export default function ServiceDirectory({
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              handleRename(history.data!.id, history.label);
+                                              handleRename(Number(history.data!.id), history.label);
                                             }}
                                             className="text-blue-600 hover:text-blue-800 text-xs p-1 rounded hover:bg-blue-50"
                                             title="重命名"
@@ -298,7 +290,7 @@ export default function ServiceDirectory({
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              handleDelete(history.data!.id);
+                                              handleDelete(Number(history.data!.id));
                                             }}
                                             className="text-red-600 hover:text-red-800 text-xs p-1 rounded hover:bg-red-50"
                                             title="删除"

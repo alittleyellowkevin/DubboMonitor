@@ -3,16 +3,16 @@ import {
   getServices,
   getMethods,
   invokeMethod,
-  getExecuteHistory,
+  // getExecuteHistory, // Not used in this hook
   insertExecuteRecord,
   updateExecuteRecord,
   deleteExecuteRecord,
-  buildDirectoryData,
-  type DirectoryNode
-} from '@/lib/mockData';
+  buildDirectoryData
+} from '@/lib/api';
+import type { Port, TestCase, DirectoryNode, ResponseData } from '@/lib/types';
 
 // 端口配置 - 支持动态添加和修改
-const getDefaultPorts = () => {
+const getDefaultPorts = (): Port[] => {
   // 从环境变量获取端口配置，如果没有则使用默认值
   const devPort = parseInt(import.meta.env.VITE_DEV_PORT || '31802');
   const testPort = parseInt(import.meta.env.VITE_TEST_PORT || '31362');
@@ -27,14 +27,6 @@ const getDefaultPorts = () => {
     { id: 'port-5', name: '自定义端口', host: 'localhost', port: 20880 },
   ];
 };
-
-interface TestCase {
-  id: string;
-  name: string;
-  params: string;
-  createTime: Date;
-  method?: string;
-}
 
 export function useDubboTester() {
   // State for ports
@@ -59,13 +51,7 @@ export function useDubboTester() {
   const [requestParams, setRequestParams] = useState<string>(
     JSON.stringify({}, null, 2)
   );
-  const [responseData, setResponseData] = useState<{
-    success: boolean;
-    data?: any;
-    error?: string;
-    time?: number;
-    timestamp?: number;
-  } | null>(null);
+  const [responseData, setResponseData] = useState<ResponseData | null>(null);
 
   // State for loading
   const [isLoading, setIsLoading] = useState(false);
@@ -386,6 +372,7 @@ export function useDubboTester() {
     try {
       await updateExecuteRecord({
         id: parseInt(selectedTestCase.id),
+        name: selectedTestCase.name,
         port: currentPort.port,
         service: serviceToUse,
         method: methodToUse,

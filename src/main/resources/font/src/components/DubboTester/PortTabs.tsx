@@ -1,15 +1,9 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-
-interface PortTab {
-  id: string;
-  name: string;
-  host: string;
-  port: number;
-}
+import type { Port } from '@/lib/types';
 
 interface PortTabsProps {
-  ports: PortTab[];
+  ports: Port[];
   activePort: string;
   setActivePort: (portId: string) => void;
   addPort?: (name: string, host: string, port: number) => string;
@@ -28,7 +22,7 @@ export default function PortTabs({
   className = ''
 }: PortTabsProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState<PortTab | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState<Port | null>(null);
   const [newPortData, setNewPortData] = useState({ name: '', host: 'localhost', port: 20880 });
   const [editPortData, setEditPortData] = useState({ name: '', host: '', port: 0 });
 
@@ -59,7 +53,7 @@ export default function PortTabs({
     }
   };
 
-  const openEditDialog = (port: PortTab) => {
+  const openEditDialog = (port: Port) => {
     setShowEditDialog(port);
     setEditPortData({ name: port.name, host: port.host, port: port.port });
   };
@@ -73,8 +67,8 @@ export default function PortTabs({
               <button
                 onClick={() => setActivePort(port.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${activePort === port.id
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
               >
                 {port.name}

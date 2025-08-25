@@ -1,28 +1,18 @@
 import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import Editor from '@monaco-editor/react';
-
-interface ResponsePanelProps {
-  responseData: {
-    success: boolean;
-    data?: any;
-    error?: string;
-    time?: number;
-    timestamp?: number;
-  } | null;
-  className?: string;
-}
+import type { ResponsePanelProps } from '@/lib/types';
 
 export default function ResponsePanel({ responseData, className = '' }: ResponsePanelProps) {
   const [viewMode, setViewMode] = useState<'formatted' | 'raw'>('formatted');
-  const [editorError, setEditorError] = useState(false);
+  const [editorError, _setEditorError] = useState(false);
   const editorRef = useRef<any>(null);
 
   // Format timestamp to readable date
-  const formatTimestamp = (timestamp: number) => {
-    if (!timestamp) return '';
-    return new Date(timestamp).toLocaleString();
-  };
+  // const formatTimestamp = (timestamp: number) => {
+  //   if (!timestamp) return '';
+  //   return new Date(timestamp).toLocaleString();
+  // }; // Currently not used
 
   // Copy response data to clipboard
   const copyToClipboard = () => {
@@ -67,23 +57,23 @@ export default function ResponsePanel({ responseData, className = '' }: Response
   };
 
   // Get formatted response data for display
-  const getFormattedResponseData = () => {
-    if (!responseData?.data) return null;
-
-    let jsonData = responseData.data;
-
-    // 如果数据是字符串，尝试解析为 JSON
-    if (typeof responseData.data === 'string') {
-      try {
-        jsonData = JSON.parse(responseData.data);
-      } catch (parseError) {
-        // 如果解析失败，返回原始字符串
-        return responseData.data;
-      }
-    }
-
-    return jsonData;
-  };
+  // const getFormattedResponseData = () => {
+  //   if (!responseData?.data) return null;
+  //
+  //   let jsonData = responseData.data;
+  //
+  //   // 如果数据是字符串，尝试解析为 JSON
+  //   if (typeof responseData.data === 'string') {
+  //     try {
+  //       jsonData = JSON.parse(responseData.data);
+  //     } catch (parseError) {
+  //       // 如果解析失败，返回原始字符串
+  //       return responseData.data;
+  //     }
+  //   }
+  //
+  //   return jsonData;
+  // }; // Currently not used
 
   // Get response data for copy
   const getResponseDataForCopy = () => {

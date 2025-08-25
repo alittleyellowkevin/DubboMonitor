@@ -1,23 +1,18 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import Editor from '@monaco-editor/react';
-
-interface RequestPanelProps {
-  className?: string;
-  requestParams: string;
-  setRequestParams: (params: string) => void;
-}
+import type { RequestPanelProps } from '@/lib/types';
 
 const RequestPanel = ({ className, requestParams, setRequestParams }: RequestPanelProps) => {
   const [isValidJson, setIsValidJson] = useState(true);
   const [formatError, setFormatError] = useState<string | null>(null);
-  const [editorLoaded, setEditorLoaded] = useState(false);
-  const [editorError, setEditorError] = useState(false);
+  // const [editorLoaded, setEditorLoaded] = useState(false); // Currently not used
+  const [editorError, _setEditorError] = useState(false);
   const editorRef = useRef<any>(null);
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
-    setEditorLoaded(true);
+    // setEditorLoaded(true); // Currently not used
 
     // 设置编辑器配置
     editor.updateOptions({

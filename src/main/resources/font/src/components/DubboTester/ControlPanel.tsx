@@ -1,20 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-
-interface TestCase {
-  id: string;
-  name: string;
-  params: string;
-  createTime: Date;
-  method?: string;
-}
-
-interface Port {
-  id: string;
-  name: string;
-  host: string;
-  port: number;
-}
+import type { TestCase, Port } from '@/lib/types';
 
 interface ControlPanelProps {
   activePort: string;
@@ -53,7 +39,7 @@ export default function ControlPanel({
   ports,
   setActiveService,
   setActiveMethod,
-  setRequestParams,
+  // setRequestParams, // Not used directly in this component
   setSelectedTestCase,
   onSendRequest,
   onAddTestCase,
@@ -63,7 +49,7 @@ export default function ControlPanel({
   isLoadingServices = false,
   isLoadingMethods = false,
   loadServices,
-  loadMethods,
+  // loadMethods, // Not used directly in this component
   formatServiceNameForDisplay,
   className = ''
 }: ControlPanelProps) {
@@ -249,7 +235,7 @@ export default function ControlPanel({
                   <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  {new Date(testCase.createTime).toLocaleString()}
+                  {testCase.createTime ? new Date(testCase.createTime).toLocaleString() : '未知时间'}
                 </div>
               </button>
             ))}
@@ -391,7 +377,7 @@ export default function ControlPanel({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">创建时间</label>
                 <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
-                  {new Date(selectedTestCase.createTime).toLocaleString()}
+                  {selectedTestCase.createTime ? new Date(selectedTestCase.createTime).toLocaleString() : '未知时间'}
                 </div>
               </div>
 
