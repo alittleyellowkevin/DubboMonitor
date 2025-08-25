@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import PortTabs from '@/components/DubboTester/PortTabs';
 import ServiceDirectory from '@/components/DubboTester/ServiceDirectory';
 import ControlPanel from '@/components/DubboTester/ControlPanel';
@@ -38,7 +38,6 @@ export default function DubboTester() {
     requestParams,
     setRequestParams,
     responseData,
-    setResponseData,
     isLoading,
     isLoadingServices,
     isLoadingMethods,
@@ -54,12 +53,40 @@ export default function DubboTester() {
     handleDeleteRequest,
     loadServices,
     loadMethods,
-    loadTestCases,
-    loadDirectoryData,
     formatServiceNameForDisplay,
-    notification,
-    showNotification
+    notification
   } = useDubboTester();
+
+  // 处理键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // 检查是否按下了 Command + S (Mac) 或 Ctrl + S (Windows/Linux)
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isSaveShortcut = (isMac && event.metaKey && event.key === 's') ||
+        (!isMac && event.ctrlKey && event.key === 's');
+
+      if (isSaveShortcut) {
+        event.preventDefault(); // 阻止默认的浏览器保存行为
+
+        // 检查是否有选中的测试用例
+        if (selectedTestCase) {
+          // 如果有选中的测试用例，执行更新操作
+          handleUpdateTestCase();
+        } else {
+          // 如果没有选中的测试用例，执行新增操作
+          handleAddTestCase();
+        }
+      }
+    };
+
+    // 添加键盘事件监听器
+    document.addEventListener('keydown', handleKeyDown);
+
+    // 清理函数
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedTestCase, handleUpdateTestCase, handleAddTestCase]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">

@@ -134,7 +134,12 @@ const RequestPanel = ({ className, requestParams, setRequestParams }: RequestPan
   return (
     <div className={cn(className)}>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-gray-800">请求参数</h2>
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+          <svg className="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+          请求参数
+        </h2>
         <div className="flex items-center space-x-2">
           {!isValidJson && (
             <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded">

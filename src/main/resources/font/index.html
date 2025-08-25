@@ -3,26 +3,26 @@
 
 <head>
   <meta charset="UTF-8" />
-  <!-- 1. 网站图标 -->
+  <!-- 网站图标 -->
   <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-  <!-- 2. 响应式视口设置，适配不同设备 -->
+  <!-- 响应式视口设置，适配不同设备 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- 3. 页面标题 -->
+  <!-- 页面标题 -->
   <title>Dubbo 服务监控</title>
-  <!-- 4. 引入 Font Awesome 图标库 -->
+  <!-- 引入 Font Awesome 图标库 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- 5. 引入 Monaco Editor 编辑器 -->
+  <!-- 引入 Monaco Editor 编辑器 -->
   <script src="https://unpkg.com/monaco-editor@0.52.2/min/vs/loader.js"></script>
   <script>
-    // 6. 配置 Monaco Editor 的路径
+    // 配置 Monaco Editor 的路径
     require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@0.52.2/min/vs' } });
   </script>
 </head>
 
 <body>
-  <!-- 7. React 应用挂载点 -->
+  <!-- React 应用挂载点 -->
   <div id="root"></div>
-  <!-- 8. 入口 JS 文件，启动前端应用 -->
+  <!-- 入口 JS 文件，启动前端应用 -->
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
