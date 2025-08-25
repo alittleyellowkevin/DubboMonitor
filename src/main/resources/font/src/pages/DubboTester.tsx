@@ -1,20 +1,36 @@
+// 引入 React 的 useEffect，用于副作用处理
 import { useEffect } from 'react';
+// 引入端口标签页组件
 import PortTabs from '@/components/DubboTester/PortTabs';
+// 引入服务目录组件
 import ServiceDirectory from '@/components/DubboTester/ServiceDirectory';
+// 引入控制面板组件
 import ControlPanel from '@/components/DubboTester/ControlPanel';
+// 引入请求参数面板组件
 import RequestPanel from '@/components/DubboTester/RequestPanel';
+// 引入响应结果面板组件
 import ResponsePanel from '@/components/DubboTester/ResponsePanel';
+// 引入自定义 hook，用于管理 Dubbo 测试器的状态和逻辑
 import { useDubboTester } from '@/hooks/useDubboTester';
 
-// Simple notification component
-const Notification = ({ notification }: { notification: { message: string; type: 'success' | 'error'; visible: boolean } | null }) => {
+// Notification 组件：用于显示操作成功或失败的提示信息
+const Notification = ({
+  notification,
+}: {
+  notification: { message: string; type: 'success' | 'error'; visible: boolean } | null;
+}) => {
+  // 如果没有通知或通知不可见，则不渲染任何内容
   if (!notification || !notification.visible) return null;
 
+  // 根据通知类型设置背景色
   const bgColor = notification.type === 'success' ? 'bg-green-500' : 'bg-red-500';
+  // 根据通知类型选择图标
   const icon = notification.type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
 
   return (
-    <div className={`fixed top-4 right-4 z-50 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in slide-in-from-right duration-300`}>
+    <div
+      className={`fixed top-4 right-4 z-50 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in slide-in-from-right duration-300`}
+    >
       <i className={`fa-solid ${icon}`}></i>
       <span className="text-sm font-medium">{notification.message}</span>
     </div>

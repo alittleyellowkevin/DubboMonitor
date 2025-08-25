@@ -10,16 +10,12 @@ export default function Home() {
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
         {/* 标题 */}
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Dubbo 测试工具 - 热重载测试
+          Dubbo 测试工具
         </h1>
-        {/* 工具介绍和热重载提示 */}
+        {/* 工具介绍 */}
         <p className="text-gray-600 text-center mb-8">
           一个功能强大的Dubbo接口测试工具，帮助开发者快速测试和调试Dubbo服务
           <br />
-          {/* 红色提示文字：用于验证热重载 */}
-          <span className="text-red-500 font-bold">
-            🔥 如果你看到这行红色文字，说明热重载正常工作！
-          </span>
         </p>
         {/* 进入测试按钮 */}
         <div className="flex justify-center">

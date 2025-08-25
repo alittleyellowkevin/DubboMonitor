@@ -197,7 +197,7 @@ export default function ControlPanel({
       </div>
 
       {/* 测试用例列表 - 固定高度，可滚动 */}
-      <div className="mb-10 flex-shrink-0" style={{ height: '150px' }}>
+      <div className="mb-10 flex-shrink-0" style={{ height: '250px' }}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-semibold text-gray-800 flex items-center">
             <svg className="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,8 +241,8 @@ export default function ControlPanel({
             ))}
           </div>
         ) : (
-          <div className="text-xs text-gray-500 italic text-center py-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded border border-gray-200" style={{ minHeight: '120px' }}>
-            <svg className="w-6 h-6 mx-auto mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-xs text-gray-500 italic text-center py-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded border border-gray-200" style={{ minHeight: '120px' }}>
+            <svg className="w-6 h-6 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             暂无测试用例

@@ -114,7 +114,7 @@ export default function PortTabs({
             <h3 className="text-lg font-semibold mb-4">添加新端口</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">端口名称</label>
+                <label className="block text-xs text-gray-500 mb-1">应用名称</label>
                 <input
                   type="text"
                   value={newPortData.name}
@@ -169,7 +169,7 @@ export default function PortTabs({
             <h3 className="text-lg font-semibold mb-4">编辑端口</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">端口名称</label>
+                <label className="block text-xs text-gray-500 mb-1">应用名称</label>
                 <input
                   type="text"
                   value={editPortData.name}
